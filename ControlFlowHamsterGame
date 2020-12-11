@@ -1,0 +1,144 @@
+package de.unistuttgart.iste.rss.oo.hamstersimulator.exercise05;
+
+import de.unistuttgart.iste.rss.oo.hamstersimulator.external.model.SimpleHamsterGame;
+
+
+/**
+ * Ein Hamsterspiel, um die Kontrollflussstrukturen zu testen.
+ *
+ * @author [Name u. Matrikelnummer]
+ */
+public class ControlFlowHamsterGame extends SimpleHamsterGame {
+    
+    /**
+     * Startet das Spiel mit einem vorgefertigtem Territory.
+     */
+    @Override
+    protected void run() {
+        this.loadTerritoryFromResourceFile("/territories/territoryExample05.ter");
+        this.displayInNewGameWindow();
+        game.startGame();
+
+       /*
+        * TODO: Hier kann man die Operationen aufrufen, um diese zu testen. Bitte NICHT die
+        *       obigen Operationsaufrufe veraendern!
+        */
+    }
+
+    /*
+     * In den folgenden Operationen implementieren Sie die Aussagen (i) - (v) der Aufgabe 2.
+     * Vergessen Sie nicht, JavaDoc und Vor- und Nachbedingungen für die operationen zu schreiben.
+     * Schreiben Sie ebenfalls FUER JEDE SCHLEIFE die SCHLEIFENINVARIANTEN und -VARIANTEN.
+     */
+    /**
+     * Wenn auf Paules Feld ein Korn liegt, soll er es aufheben.
+     * @requires territory.getNumberOfGrainsAt(paule.getLocation() !=0
+     * @ensures !paule.mouthEmpty() && territory.getNumberOfGrainsAt(paule.getLocation()) == \old territory.getNumberOfGrainsAt(paule.getLocation()) -1
+     */
+    private void pickGrainIfAvailable() {
+    	if(paule.grainAvailable()) {
+    		paule.pickGrain();
+    	}
+    }
+    /**
+     * Solange auf Paules Feld ein Korn liegt, soll er es aufheben
+     * @requires territory.getNumberOfGrainsAt(paule.getLocation()) >=1
+     * @ensures !paule.mouthEmpty() && !paule.grainAvailable() 
+     */
+    private void pickAllGrains() {
+    	while(paule.grainAvailable()) {
+    		paule.pickGrain();
+    	}
+    }
+    /**
+     * Paule muss 5 Felder weit gehen, um zu einem Korn zu gelangen, welches er aufheben will.
+     * @requires territory.getGrainCountAt(paule.getLocation() + 5 Keachel)>=1
+     * @requires !territory.isBlockedByWall(paule.getLocation() + 5 Keachel)
+     * @ensures !paule.mouthEmpty() && territory.getTotalGrainCount() == \old territory.getTotalGrainCount() - 1
+     * @param times
+     */
+    private void multiMove(Integer times) {
+    	/*@
+    	@ loop_invariant Paule visited i tiles
+    	@ decreasing 5-i (bei jeder Iteration verringert)
+    	@*/
+    	for (int i = 0; i<5; i++) {
+    		paule.move();
+    	}
+    	paule.pickGrain();
+    }
+    /**
+     * Wenn auf Paules Feld ein Korn liegt, soll er es aufheben. Ansonsten soll er ein Feld nach
+     * vorne gehen.
+     *  @requires paule.mouthEmpty() && paule.frontIsClear()
+     *  @requires s 0 <= territory.getGrainCountAt(paule.getLocation()) <= 1
+     *  @ensures \old(paule.grainAvailable()) ==> !paule.mouthIsEmpty() && !paule.grainAvailable()
+     *  @ensures \old(!paule.grainAvailable()) ==> paule.getLocation() == singleMoveTarget
+     */
+    private void pickGrainOrMove() {
+    	while(paule.mouthEmpty() && paule.frontIsClear()) {
+    		if(paule.grainAvailable()) {
+    			paule.pickGrain();
+    		}
+    		else
+    		{
+    			paule.move();
+    		}
+    	}
+    }
+    /**
+     * Auf Paules Feld liegt mindestens ein Korn. Solange auf Paules Feld ein Korn liegt,
+     *  soll er es aufheben.
+     *  @requires territory.getNumberofGrainsAt(paule.getLocation())>=1
+     *  @ensures !paule.grainAvailable()
+     */
+    private void pickAllGrainsOnNonEmptyTile() {
+    	do {
+    		paule.pickGrain();
+    	}while(paule.grainAvailable());
+    }
+
+    private void cleanTerritory() {
+    	for(int row = 0; row<5; row++) {
+    		for(int col = 0; col<7; col++) {
+    			while(paule.grainAvailable()){
+    				paule.pickGrain();
+    				}
+    			paule.move();
+    		}
+    		if(row % 2 == 0) {
+    			paule.turnLeft();
+    			paule.move();
+    			paule.turnLeft();
+    		}
+    		else {
+    			turnRight();
+    			paule.move();
+    			turnRight();
+    		}
+    	}   
+    }
+    private void turnRight() {
+    	for(int i = 0; i<3; i++) {
+    		paule.turnLeft();
+    	}
+    }
+    /**
+     * @requires amountOfGrains >= 1
+     * @ensures getNumberOfGrainsAt(paule.getLocation()) == amountOfGrains
+     */
+    private void putGrains(Integer amountOfGrains) {
+        for(int i = 0; i<amountOfGrains; i++) {
+        	paule.putGrain();
+        }
+    }
+    /**
+     *  @requires !paule.mouthEmpty()
+     *  @ensures paule.mouthEmpty()
+     */
+    private void emptyMouth() {
+        while(!paule.mouthEmpty()) {
+        	paule.putGrain();
+        }
+    }
+}
